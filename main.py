@@ -100,12 +100,16 @@ def textfile_to_image(lst: List[str]):
 
 
 if __name__ == '__main__':
+    # ##############################################################################################
     # IMPORT FILE
     # The import_file() method should only be called once with the current video
     # After we have generated at least once, we can work with the frames inside
+    # ##############################################################################################
     import_file()
 
+    # ##############################################################################################
     # CREATE FRAMES
+    # ##############################################################################################
     if not os.path.exists('origFrames'):
         Exception('Error: Cannot find originalFrames to convert')
     else:
@@ -114,11 +118,13 @@ if __name__ == '__main__':
         os.makedirs('finalFrames')
 
         for frame in os.listdir('origFrames'):
+            print(f'Converting {frame}...')
+
             pic = PIL.Image.open(os.path.join('origFrames/', frame))
 
-            # This 6 is an arbitrary number that I chose
+            # 6 is an arbitrary number that I chose in the config
             # The higher the number, the lower the resolution
-            pic = resize(pic, new_width=pic.width // 6)
+            pic = resize(pic, new_width=pic.width // RESOLUTION_FRACTION)
 
             img_width = pic.width
 
@@ -132,12 +138,22 @@ if __name__ == '__main__':
             out_img = textfile_to_image(ascii_img)
             out_img.save(os.path.join('finalFrames/', frame))
 
-            print(f'Converting {frame}...')
-
+    # ##############################################################################################
     # GENERATE VIDEO
+    # ##############################################################################################
     (
         ffmpeg
-        .input('/finalFrames/*.jpg', pattern_type='glob', framerate=24)
+        .input('finalFrames/frame%d.jpg', pattern_type='sequence', framerate=30)
+        .output('finalNoAudio.mp4')
+        .run(overwrite_output=True)
+    )
+
+    audio = ffmpeg.input('originalAudio.mp3')
+    video = ffmpeg.input('finalNoAudio.mp4')
+
+    (
+        ffmpeg
+        .concat(video, audio, v=1, a=1)
         .output('final.mp4')
-        .run()
+        .run(overwrite_output=True)
     )
