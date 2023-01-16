@@ -4,6 +4,10 @@ Bad Apple but rendered with only 0s and 1s
 
 Can be used to convert a video into 0s and 1s (and more)
 
+# Demo
+
+![Gif demo of the converted result](./output.gif)
+
 # Libraries Utilized
 
 - OpenCV
